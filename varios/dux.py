@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver import ActionChains
 from selenium.webdriver.firefox.options import Options
+from selenium.common.exceptions import TimeoutException
 import traceback
 import os
 import time
@@ -281,60 +282,258 @@ class Dux:
             btn_guardar.click()
         return imagename
             
+
+    def procesarOperacion(self, item, i):
+        wait = WebDriverWait(self.driver, 2)
+
+        concepto_gasto = '111059'
+        importe = str(item["suma"])
+        detalle = f"Remito: {item['nro_remito']} por los certificados {item['certificados']}"
+        numop = item["numop"]
+
+
+        buscar = f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ewnNroOperacion"
+        #operacion = wait.until(EC.element_located_to_be_selected((By.ID, buscar)))
+
+        operacion = self.driver.find_element(By.ID, buscar)
+        operacion.clear()
+        operacion.send_keys(numop)
+        operacion.send_keys(Keys.TAB)
+
+        try:
+            time.sleep(1)
+            
+            modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
+            
+            if ( modal.text == 'La operación:\n* tiene facturas contabilizadas'):
+                
+                modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
+                modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                
+                modal_close[0].click()
+                modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                if len(modal_close) > 0:
+                    modal_close[1].click()
+                    modal_close[0].click()
+
+        except TimeoutException as e:
+            print(e)
+        except IndexError as e:
+            print(f"Error de index: {e}")
+        time.sleep(1)
+        combo_gastos = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ayudaGasto_AutoSuggestBox")))
+
+        combo_gastos = self.driver.find_element(By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ayudaGasto_AutoSuggestBox")
+        
+        combo_gastos.send_keys(Keys.CONTROL + 'a')
+        combo_gastos.send_keys(Keys.DELETE) 
+        time.sleep(1)
+        combo_gastos.send_keys(concepto_gasto)
+        time.sleep(1)
+        combo_gastos.send_keys(Keys.TAB)
+        time.sleep(1)
+        
+        importe_input = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_importe")))
+        
+        
+        importe_input = self.driver.find_element(By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_importe")
+        importe_input.clear()
+        importe_input.send_keys(importe)
+        importe_input.send_keys(Keys.TAB)
+
+        time.sleep(1)
+        detalle_input = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_detalle")))
+
+        detalle_input = self.driver.find_element(By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_detalle")
+        detalle_input.clear()
+        detalle_input.send_keys(detalle)
+        detalle_input.send_keys(Keys.TAB)
+
+    def procesarCabeceraFactura(self, nro_factura, fecha_factura, archivo_factura, importe_no_gravado):
+        wait = WebDriverWait(self.driver, 15)
+        espero_combo = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ayuProveedor_AutoSuggestBox")))
+
+        combo_proveedor = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ayuProveedor_AutoSuggestBox")
+        combo_proveedor.clear()
+        combo_proveedor.send_keys("1751")
+        combo_proveedor.send_keys(Keys.RETURN)
+
+        time.sleep(2)
+        sucursal, numero = nro_factura.split('-')
+        sucursal_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ewnNroSucursal")
+        sucursal_input.clear()
+        sucursal_input.send_keys(sucursal)
+
+        nro_factura_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ewnNroFactura")
+        nro_factura_input.clear()
+        nro_factura_input.send_keys(numero)
+        #time.sleep(1)
+        fecha_factura_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_cfeFecha_Fecha")
+        fecha_factura_input.clear()
+        fecha_factura_input.send_keys(fecha_factura)
+        fecha_factura_input.send_keys(Keys.TAB)
+
+
+        no_gravado_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ewnNoGravado")
+
+        no_gravado_input.clear()
+        no_gravado_input.send_keys(str(importe_no_gravado))
+        no_gravado_input.send_keys(Keys.TAB)
+
+        
+
+
+
+    def ingresarFactura(self, nro_factura, fecha_factura, data_factura, archivo_factura, importe_no_gravado):
+        wait = WebDriverWait(self.driver, 15)
+        time.sleep(5)
+        espera_carga = wait.until (EC.presence_of_all_elements_located( (By.XPATH, '//*[@id="ctl00_Menu1_MenuRight_Menu1n124"]/td/table/tbody/tr/td/a')))
+        
+
+        factura_proveedores = self.driver.find_element(By.XPATH, '//*[@id="ctl00_Menu1_MenuRight_Menu1n124"]/td/table/tbody/tr/td/a')
+        
+
+
+        wait = WebDriverWait(self.driver, 15)
+        time.sleep(3)
+        
+        factura_proveedores.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", factura_proveedores)
+
+        self.procesarCabeceraFactura(nro_factura, fecha_factura, archivo_factura, importe_no_gravado)
+
+        length = len(data_factura)
+
+        if length > 10:
+            range = length - 10
+
+            range_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_esGridItems_ctl12_cantidadConceptos")
+
+            range_input.clear()
+            range_input.send_keys(range)
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_esGridItems_ctl12_agregar")))
+            button_add_range = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_esGridItems_ctl12_agregar")
+
+            button_add_range.click()
+        i=1
+        for item in data_factura:
+            i+=1
+
+            self.procesarOperacion(item, i)
+        
+        wait = WebDriverWait(self.driver, 10)
+        upload_btn = wait.until (EC.element_to_be_clickable( (By.ID, 'ctl00_ContentPlaceHolder1_FileUploadFoto')))
+
+        select_file = wait.until (EC.element_to_be_clickable( (By.ID, 'ctl00_ContentPlaceHolder1_FileUploadFoto')))
+        
+        file = config.config.dux_factura_pdf + '\\' + archivo_factura 
+        
+        select_file.send_keys(file)
+        time.sleep(2)
+        boton_guardar = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_Grabar")))
+        boton_guardar.click()
+        
+        time.sleep(5)
+        try:
+            time.sleep(1)
+            
+            modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
+            
+            if ( modal.text == ' Existen operaciones que poseen facturas generadas y/o confirmadas\nExisten operaciones con facturas contabilizadas'):
+                
+                modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
+                modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                
+                modal_close[0].click()
+                # modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                # if len(modal_close) > 0:
+                #     modal_close[1].click()
+                #     modal_close[0].click()
+
+        except TimeoutException as e:
+            print(e)
+        except IndexError as e:
+            print(f"Error de index: {e}")
+        time.sleep(5)
+        current_windows =self.driver.current_window_handle
+        windows = self.driver.window_handles
+
+        self.driver.switch_to.window(windows[-1])
+
+        imagename= self.SaveImage(nro_factura)
+        self.driver.close()
+        self.driver.switch_to.window(current_windows)
+        
+        bot = self.driver.find_elements(By.CSS_SELECTOR, "button.ui-button")
+        for b in bot:
+            if b.text == 'No':
+                b.click()
+        
+        time.sleep(3)
+
+        return imagename
     def testbtn(self, numop):
         wait = WebDriverWait(self.driver, 15)
         time.sleep(5)
-        espera_carga = wait.until (EC.presence_of_all_elements_located( (By.CLASS_NAME, 'ctl00_Menu1_MenuLeft_Menu1_6')))
+        espera_carga = wait.until (EC.presence_of_all_elements_located( (By.XPATH, '//*[@id="ctl00_Menu1_MenuRight_Menu1n124"]/td/table/tbody/tr/td/a')))
         
 
-        # gestion_djve = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[15]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
+        factura_proveedores = self.driver.find_element(By.XPATH, '//*[@id="ctl00_Menu1_MenuRight_Menu1n124"]/td/table/tbody/tr/td/a')
         # print(gestion_djve.get_attribute('href'))
         # gestion_djve.location_once_scrolled_into_view
         # self.driver.execute_script("arguments[0].click();", gestion_djve)
 
 
         wait = WebDriverWait(self.driver, 15)
-        
-        otros_datos = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[16]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
+        time.sleep(5)
+        #otros_datos = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[16]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
         # otros_datos.click()
         #gestion_djve = driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[15]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
     #print(gestion_djve.get_attribute('href'))
-        otros_datos.location_once_scrolled_into_view
-        self.driver.execute_script("arguments[0].click();", otros_datos)
+        factura_proveedores.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", factura_proveedores)
 
-        espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")))
+        espero_combo = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ayuProveedor_AutoSuggestBox")))
 
-        buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
-        operacion = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_txOperacionSeteable_AutoSuggestBox")
+        combo_proveedor = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ayuProveedor_AutoSuggestBox")
+        combo_proveedor.clear()
+        combo_proveedor.send_keys("1751")
+        combo_proveedor.send_keys(Keys.RETURN)
+
+        sucursal_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ewnNroSucursal")
+        nro_factura_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ewnNroFactura")
+
+        #buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
+        #operacion = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_txOperacionSeteable_AutoSuggestBox")
         
-        operacion.send_keys(numop)
-        buscar_op.click()
+        #operacion.send_keys(numop)
+        #buscar_op.click()
 
-        solapa_carga = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label3"]')
+        #solapa_carga = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label3"]')
 
-        solapa_carga.location_once_scrolled_into_view
-        self.driver.execute_script("arguments[0].click();", solapa_carga)
+        #solapa_carga.location_once_scrolled_into_view
+        #self.driver.execute_script("arguments[0].click();", solapa_carga)
 
-        espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
+        #espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
 
-        btn_modificar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnModificar')
+        #btn_modificar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnModificar')
 
-        btn_modificar.click()
-
-
-        espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
+        #btn_modificar.click()
 
 
-        btn_save = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
-
-        btn_save.click()
+        #espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
 
 
-        espero_carga = wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div[2]/span[2]")))
+        #btn_save = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
 
-        element = self.driver.find_element(By.XPATH , '/html/body/div[1]/div[2]/span[2]')
+        #btn_save.click()
 
-        print(element.get_attribute('InnerHTML'))
+
+        #espero_carga = wait.until(EC.presence_of_element_located((By.XPATH, "/html/body/div[1]/div[2]/span[2]")))
+
+        #element = self.driver.find_element(By.XPATH , '/html/body/div[1]/div[2]/span[2]')
+
+        #print(element.get_attribute('InnerHTML'))
 
 
     def Close (self):

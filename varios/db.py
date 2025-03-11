@@ -173,14 +173,14 @@ class Db:
                                     FROM robot_tarea \
                                     LEFT JOIN auth_user ON auth_user.user_id = robot_tarea.user_id \
                                     WHERE estado IN ( 0, 3) \
-                                      AND proceso IN ('fecha_plaza_proceso', 'doc_puerto_proceso') \
+                                      AND proceso IN ('fecha_plaza_proceso', 'doc_puerto_proceso', 'certificado_origen') \
                                     ORDER BY fecha_alta asc")
             
             #print(self.cursor.rowcount)
             #
             #print(*row, sep=' ')
             tareas = []
-            if self.cursor.rowcount >= 1:
+            if self.cursor.rowcount > 1:
                 for table_row in self.cursor:
                     tareas.append([
                         table_row[0], #id 0
@@ -239,7 +239,30 @@ class Db:
         
         
 
+    def getOperacionesRemitos(self, nro_factura):
+        try:
+            sentence="""SELECT  cof.nro_remito, cof.fecha_factura, cof.numop, 
+                            cod.archivo as archivo_factura,
+                            cod.total_factura,
+                            GROUP_CONCAT(cof.certificado SEPARATOR ',') AS certificados,
+                            SUM(cof.precio_unitario) as suma
+                          FROM cert_origen_facturacion cof
+                          JOIN cert_origen_documentos cod ON cod.nro_factura = cof.nro_factura AND cod.anulado = 'N'
+                          WHERE cof.nro_factura = ?
+                          AND cof.anulado = 'N'
+                          GROUP BY cof.nro_remito, cof.fecha_factura, cof.numop, cod.archivo 
+                          """
+            
+            
+            with self.conn.cursor(dictionary=True) as cursor:
+                cursor.execute(sentence, [nro_factura])
 
+                table = cursor.fetchall()
+                
+
+                return table
+        except mariadb.Error as e:
+            print(f"Error connecting to MariaDB Platform: {e}")
 
 
 db =  Db( config.config.db_url, config.config.db_username,
