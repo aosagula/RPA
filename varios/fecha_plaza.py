@@ -82,7 +82,7 @@ try:
             fecha_alta = tarea[3]
             if proceso == 'doc_puerto_proceso':
                 db.db.setEstadoTarea( current_task, 1)
-                fecha_a_plaza, numop, tipo_op = procesa_parametros(proceso, tarea[1])
+                fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
                 imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta)
                 db.db.setEstadoTarea( current_task, 2)
                 
