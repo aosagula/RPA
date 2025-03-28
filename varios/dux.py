@@ -9,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver import ActionChains
 from selenium.webdriver.firefox.options import Options
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 import traceback
 import os
 import time
@@ -317,7 +317,7 @@ class Dux:
                 actions.move_to_element(close_button).pause(0.3).click().perform()
                 actions.move_to_element(close_button).pause(0.3).click().perform()
                 actions.move_to_element(close_button).pause(0.3).click().perform()
-                
+
                 #modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
                 
                 #modal_close = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
@@ -332,6 +332,8 @@ class Dux:
             print(e)
         except IndexError as e:
             print(f"Error de index: {e}")
+        except StaleElementReferenceException:
+            print("StaleElementReferenceException")
         time.sleep(1)
         combo_gastos = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ayudaGasto_AutoSuggestBox")))
 
