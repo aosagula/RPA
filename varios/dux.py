@@ -310,7 +310,7 @@ class Dux:
                 modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
                 modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
                 
-                modal_close[0].click()
+                #modal_close[0].click()
                 modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
                 if len(modal_close) > 0:
                     modal_close[1].click()
