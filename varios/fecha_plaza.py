@@ -127,13 +127,13 @@ try:
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 except Exception as inst :
     error_description = traceback.format_exc()
-    #base_url = base_url  = 'https://api.telegram.org/bot6884941709:AAFedvLx2DxTRtuQJ59BIO3AoB00VJVDE6E/sendMessage?chat_id=-4008612871&text="{}"'.format(error_description)
-    #requests.get(base_url)
+    base_url = base_url  = 'https://api.telegram.org/bot6884941709:AAFedvLx2DxTRtuQJ59BIO3AoB00VJVDE6E/sendMessage?chat_id=-4008612871&text="{}"'.format(error_description)
+    requests.get(base_url)
     db.db.setEstadoTarea(current_task, 3, error_description)
     print(error_description)
     imagename=dux.dux.SaveImage(current_task)
     dux.dux.Close()
-    #smtp.smtp.SendMail('tickets@itservices.vaclog.com', 'RPA_fecha_a_plaza -> Error en tarea {tarea}'.format(tarea=current_task), error_description, error_description, imagename)
+    smtp.smtp.SendMail('tickets@itservices.vaclog.com', 'RPA_fecha_a_plaza -> Error en tarea {tarea}'.format(tarea=current_task), error_description, error_description, imagename)
     if os.path.isfile(imagename):
         os.remove(imagename)
     
