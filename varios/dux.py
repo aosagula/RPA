@@ -290,7 +290,7 @@ class Dux:
         importe = str(item["suma"])
         detalle = f"Remito: {item['nro_remito']} por los certificados {item['certificados']}"
         numop = item["numop"]
-
+        print(f"numop: {numop} - importe: {importe} - detalle: {detalle}")
 
         buscar = f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ewnNroOperacion"
         #operacion = wait.until(EC.element_located_to_be_selected((By.ID, buscar)))
@@ -306,7 +306,7 @@ class Dux:
             modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
             
             if ( modal.text == 'La operación:\n* tiene facturas contabilizadas'):
-                
+                time.sleep(2)
                 modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
                 modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
                 
