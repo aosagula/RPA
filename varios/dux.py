@@ -164,9 +164,13 @@ class Dux:
 
 
 
-        espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
-        btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
-        btn_cancelar.click()
+        # espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
+        # btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+        # btn_cancelar.click()
+
+        espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
+        btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
+        btn_guardar.click()
         # if( len(fecha_pre_cumplido_value) == 0 ):
         #     espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
         #     modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
