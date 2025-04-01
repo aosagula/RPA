@@ -14,7 +14,7 @@ import traceback
 import os
 import time
 from datetime import datetime
-
+import re
 import tempfile
 class ImportXmlFail(Exception):
         def __init__(self, message):
@@ -153,9 +153,28 @@ class Dux:
         
 
         self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtNumeroBooking", values['nro_booking'])
-        self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuFechaCutOffDocumental_Fecha", datetime.strptime(values['fecha_cutoff_documental'], '%Y-%m-%d').strftime('%d/%m/%Y'))
+
+        
+
+        fecha_str = values.get('fecha_cutoff_documental', '')
+
+        # Verifica si el formato es YYYY-MM-DD
+        if re.match(r'^\d{4}-\d{2}-\d{2}$', fecha_str):
+            self.locateAndSetValue(
+                "ctl00_ContentPlaceHolder1_ayuFechaCutOffDocumental_Fecha",
+                datetime.strptime(fecha_str, '%Y-%m-%d').strftime('%d/%m/%Y')
+            )
         self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffDocumental", values['hora_cutoff_documental'], 'format_time')
-        self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuFechaCutOffFisico_Fecha", datetime.strptime(values['fecha_cutoff_fisico'], '%Y-%m-%d').strftime('%d/%m/%Y'))
+        fecha_str = values.get('fecha_cutoff_fisico', '')
+
+
+        # Verifica si el formato es YYYY-MM-DD
+        if re.match(r'^\d{4}-\d{2}-\d{2}$', fecha_str):
+            self.locateAndSetValue(
+                "ctl00_ContentPlaceHolder1_ayuFechaCutOffFisico_Fecha",
+                datetime.strptime(fecha_str, '%Y-%m-%d').strftime('%d/%m/%Y')
+            )
+        
         self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffFisico", values['hora_cutoff_fisico'], 'format_time')
         
         

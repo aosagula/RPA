@@ -124,6 +124,8 @@ try:
                     if os.path.isfile(imagename):
                          os.remove(imagename)
             elif proceso== 'instruccion_embarque':
+                tos='Celula4@vaclog.com,asagula@vaclog.com'
+
                 db.db.setEstadoTarea( current_task, 1)
                 numop = tarea[5]
                 values = db.db.getInstruccionEmbarque(numop)
