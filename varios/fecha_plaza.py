@@ -123,6 +123,16 @@ try:
                     smtp.smtp.SendMail(tos.split(','), f"RPA_factura_proveedores -> Factura {nro_factura} ", "OK", "OK", imagename)
                     if os.path.isfile(imagename):
                          os.remove(imagename)
+            elif proceso== 'instruccion_embarque':
+                db.db.setEstadoTarea( current_task, 1)
+                numop = tarea[5]
+                values = db.db.getInstruccionEmbarque(numop)
+                imagename = dux.dux.setInstruccionEmbarque(numop, values)
+                db.db.setEstadoTarea( current_task, 2)
+                dux.dux.backMainMenu()
+                print("esperando proxima tarea DUX")
+                time.sleep(1)
+                smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
         dux.dux.Close()
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 except Exception as inst :

@@ -13,6 +13,7 @@ from selenium.common.exceptions import TimeoutException, StaleElementReferenceEx
 import traceback
 import os
 import time
+from datetime import datetime
 
 import tempfile
 class ImportXmlFail(Exception):
@@ -44,7 +45,7 @@ class Dux:
         action.perform()
         time.sleep(4)
     def Login (self):
-        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
         print('Autenticando ....')
         wait = WebDriverWait(self.driver, 10) 
         #EC.element_to_be_selected
@@ -75,15 +76,117 @@ class Dux:
         login_btn.click()
 
         print('Login')
-        print(datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+        print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
     def SaveImage(self, current_task):
         filename = "{tempdir}\{current_task}.png".format(tempdir=tempfile.gettempdir(), current_task=current_task)
         self.driver.save_full_page_screenshot(filename)
         print(filename)
         return  filename
+    
+    def locateAndSetValue(self, element_name, value, tipo='text'):
+        wait = WebDriverWait(self.driver, 10)
+        element = wait.until(EC.presence_of_element_located((By.ID, element_name)))
+        element_value = element.get_attribute('value')
+        print(f'ya existe {element_name}: ', element_value)
+        if element_value != value:
+            
+            if tipo == 'text':
+                element.clear()
+                element.send_keys(value)
+                element.send_keys(Keys.RETURN)
+            elif tipo == 'format_time':
+                element.send_keys(Keys.CONTROL + 'a')
+                element.send_keys(Keys.DELETE)
+                hora_str = value
+                if len(hora_str) == 5 and hora_str.count(":") == 1:
+                    hora_str = hora_str + ":00"
+                element.send_keys(hora_str)
+                element.send_keys(Keys.TAB)
+            else:
+                element.clear()
+                element.send_keys(value)
+                element.send_keys(Keys.TAB)
+            print(f'actualizo {element_name}: ', value)
+
+
+    def setInstruccionEmbarque(self, numop, values=[]):
+
+        wait = WebDriverWait(self.driver, 15)
+        time.sleep(5)
+        espera_carga = wait.until (EC.presence_of_all_elements_located( (By.CLASS_NAME, 'ctl00_Menu1_MenuLeft_Menu1_6')))
+        
+
+        wait = WebDriverWait(self.driver, 15)
+        
+        otros_datos = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[16]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
+        
+        otros_datos.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", otros_datos)
+        time.sleep(1)
+        espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")))
+
+        buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
+        operacion = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_txOperacionSeteable_AutoSuggestBox")
+        operacion.clear()
+        operacion.send_keys(numop)
+        buscar_op.click()
+        time.sleep(2)
+        espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
+        modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
+        modificar_op.click()
+
+        time.sleep(1)
+        solapa_carga = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label3"]')
+
+        solapa_carga.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", solapa_carga)
+
+        
+
+        self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuTerminalSalida_AutoSuggestBox", values['lugargiro_id'], 'suggest_box')
+
+        solapa_datos_compl = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label8"]')
+
+        solapa_datos_compl.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", solapa_datos_compl)
+        
+
+        self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtNumeroBooking", values['nro_booking'])
+        self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuFechaCutOffDocumental_Fecha", datetime.strptime(values['fecha_cutoff_documental'], '%Y-%m-%d').strftime('%d/%m/%Y'))
+        self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffDocumental", values['hora_cutoff_documental'], 'format_time')
+        self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuFechaCutOffFisico_Fecha", datetime.strptime(values['fecha_cutoff_fisico'], '%Y-%m-%d').strftime('%d/%m/%Y'))
+        self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffFisico", values['hora_cutoff_fisico'], 'format_time')
         
         
+        imagename = self.SaveImage(numop)
+
+
+
+
+        espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
+        btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+        btn_cancelar.click()
+        # if( len(fecha_pre_cumplido_value) == 0 ):
+        #     espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
+        #     modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
+        #     modificar_op.click()
+        #     espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
+        #     fecha_pre_cumplido = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ayuFechaPreCumplido_Fecha")
+
+        #     fecha_pre_cumplido.clear()
+        #     fecha_pre_cumplido.send_keys(fecha_a_plaza)
+        #     print(fecha_a_plaza)
+        #     btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+        #     espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
+        #     btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
+        #     time.sleep(3)
+        #     imagename = self.SaveImage(numop)
+        #     btn_cancelar.click()
+        #     #btn_guardar.click()
+            
+        return imagename
+    
     def setInExpo(self, numop, fecha_a_plaza):
 
         wait = WebDriverWait(self.driver, 15)

@@ -169,11 +169,15 @@ class Db:
         try:
             self.cursor.execute("SELECT id, proceso, parametros, \
                                         concat(auth_user.nombre, ' ', auth_user.apellido) as nomape, \
-                                        robot_tarea.fecha_alta \
+                                        robot_tarea.fecha_alta, \
+                                        robot_tarea.numop \
                                     FROM robot_tarea \
                                     LEFT JOIN auth_user ON auth_user.user_id = robot_tarea.user_id \
                                     WHERE estado IN ( 0, 3) \
-                                      AND proceso IN ('fecha_plaza_proceso', 'doc_puerto_proceso', 'certificado_origen') \
+                                      AND proceso IN ('fecha_plaza_proceso', \
+                                                      'doc_puerto_proceso', \
+                                                      'certificado_origen' , \
+                                                      'instruccion_embarque') \
                                     ORDER BY fecha_alta asc")
             
             #print(self.cursor.rowcount)
@@ -187,13 +191,14 @@ class Db:
                         table_row[2], #parametros 1 
                         table_row[3], #user 2 
                         table_row[4], #fecha_alta 3
-                        table_row[1]  #proceso 4
+                        table_row[1],  #proceso 4
+                        table_row[5]   #numop 5
                         
                     ])
             else:
                 if self.cursor.rowcount == 1:
                     row= self.cursor.fetchone()
-                    tareas.append([row[0], row[2], row[3], row[4], row[1]])
+                    tareas.append([row[0], row[2], row[3], row[4], row[1], row[5]])
                 
             #print('tareas:' , tareas)
             return tareas
@@ -201,7 +206,34 @@ class Db:
         except mariadb.Error as e:
             print(f"Error connecting to MariaDB Platform: {e}")
             sys.exit(1)
-        
+    def getInstruccionEmbarque(self,numop ):
+        try:
+            self.cursor.execute("SELECT ie.idinstruccion, \
+                                ie.nro_booking, \
+                                ie.lugargiro_id,\
+                                ie.lugargiro_nombre, \
+                                ie.fecha_cutoff_documental, \
+                                ie.hora_cutoff_documental, \
+                                ie.fecha_cutoff_fisico, \
+                                ie.hora_cutoff_fisico \
+                                FROM instruccion_embarque ie WHERE numop = ?", [numop])
+            #print(self.cursor.rowcount)
+            #print(*row, sep=' ')
+            values   = []
+            row = self.cursor.fetchone()
+
+            if row:
+                column_names = [desc[0] for desc in self.cursor.description]
+                values = dict(zip(column_names, row))
+            else:
+                values = {}  # o None, dependiendo cómo lo quieras manejar
+                            
+            #print('tareas:' , tareas)
+            return values
+            
+        except mariadb.Error as e:
+            print(f"Error connecting to MariaDB Platform: {e}")
+            sys.exit(1)
     def getTareasPendientesProc(self, proceso):
         print("Obteniendo Tareas....")
         try:
