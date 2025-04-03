@@ -143,8 +143,8 @@ class Dux:
         self.driver.execute_script("arguments[0].click();", solapa_carga)
 
         
-
-        self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuTerminalSalida_AutoSuggestBox", values['lugargiro_id'], 'suggest_box')
+        if (values['lugargiro_id'] != '' and values['lugargiro_id'] != None):
+            self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuTerminalSalida_AutoSuggestBox", values['lugargiro_id'], 'suggest_box')
 
         solapa_datos_compl = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label8"]')
 
