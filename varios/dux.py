@@ -141,7 +141,7 @@ class Dux:
 
         solapa_carga.location_once_scrolled_into_view
         self.driver.execute_script("arguments[0].click();", solapa_carga)
-
+        time.sleep(2)
         
         if (values['lugargiro_id'] != '' and values['lugargiro_id'] != None):
             self.locateAndSetValue("ctl00_ContentPlaceHolder1_ayuTerminalSalida_AutoSuggestBox", values['lugargiro_id'], 'suggest_box')
@@ -150,7 +150,7 @@ class Dux:
 
         solapa_datos_compl.location_once_scrolled_into_view
         self.driver.execute_script("arguments[0].click();", solapa_datos_compl)
-        
+        time.sleep(2)
 
         self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtNumeroBooking", values['nro_booking'])
 
