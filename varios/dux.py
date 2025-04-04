@@ -412,7 +412,7 @@ class Dux:
     def procesarOperacion(self, item, i):
         wait = WebDriverWait(self.driver, 2)
 
-        concepto_gasto = '111059'
+        concepto_gasto = '112256'
         importe = str(item["suma"])
         detalle = f"Remito: {item['nro_remito']} por los certificados {item['certificados']}"
         numop = item["numop"]
