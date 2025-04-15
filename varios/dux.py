@@ -489,6 +489,27 @@ class Dux:
         detalle_input.send_keys(detalle)
         detalle_input.send_keys(Keys.TAB)
 
+    def ajustar_fecha_factura(self, fecha_factura: str) -> str:
+        """
+        Ajusta la fecha de factura si es del mes anterior y la fecha actual es mayor al 15.
+        Devuelve la fecha ajustada o la original en formato "dd/mm/yyyy".
+        """
+        # Convertimos la fecha_factura de texto a datetime
+        fecha_factura_dt = datetime.strptime(fecha_factura, "%d/%m/%Y")
+        
+        # Obtenemos la fecha actual
+        hoy = datetime.today()
+        
+        # Si hoy es mayor al día 15 y la fecha_factura es del mes anterior al mes actual
+        if hoy.day > 5:
+            if (fecha_factura_dt.year == hoy.year and fecha_factura_dt.month == hoy.month - 1) or \
+            (fecha_factura_dt.year == hoy.year - 1 and hoy.month == 1 and fecha_factura_dt.month == 12):
+                # Ajustar la fecha al primer día del mes en curso
+                nueva_fecha = datetime(hoy.year, hoy.month, 1)
+                return nueva_fecha.strftime("%d/%m/%Y")
+        
+        return fecha_factura
+        
     def procesarCabeceraFactura(self, nro_factura, fecha_factura, archivo_factura, importe_no_gravado):
         wait = WebDriverWait(self.driver, 15)
         espero_combo = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_ayuProveedor_AutoSuggestBox")))
@@ -508,6 +529,8 @@ class Dux:
         nro_factura_input.clear()
         nro_factura_input.send_keys(numero)
         #time.sleep(1)
+        
+        fecha_factura = self.ajustar_fecha_factura(fecha_factura)
         fecha_factura_input = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_cfeFecha_Fecha")
         fecha_factura_input.clear()
         fecha_factura_input.send_keys(fecha_factura)
