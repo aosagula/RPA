@@ -89,6 +89,14 @@ class Db:
         
         return result
 
+    def setSubidoADux(self, nro_factura):
+        query = f"""UPDATE cert_origen_documentos SET 
+                           subido_a_dux = 'S' 
+                    WHERE nro_factura = '{nro_factura}'
+                      AND anulado = 'N'
+                """
+        self.cursor.execute(query )
+        self.conn.commit()
     def setEstadoTarea(self, id, estado, error_desciption=None, subestado_text=None):
         try:
             now = datetime.datetime.now()
