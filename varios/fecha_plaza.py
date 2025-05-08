@@ -121,6 +121,7 @@ try:
                     imagename= dux.dux.ingresarFactura(nro_factura, fecha_factura.strftime("%d/%m/%Y"), matriz_op_remitos, archivo_factura, importe_no_gravado)
                     db.db.setEstadoTarea( current_task, 2)
                     smtp.smtp.SendMail(tos.split(','), f"RPA_factura_proveedores -> Factura {nro_factura} ", "OK", "OK", imagename)
+                    db.db.setSubidoADux(nro_factura)
                     if os.path.isfile(imagename):
                          os.remove(imagename)
             elif proceso== 'instruccion_embarque':
