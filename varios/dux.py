@@ -75,6 +75,13 @@ class Dux:
 
         login_btn.click()
 
+
+        time.sleep(1)
+        home_page=    wait.until (EC.element_to_be_clickable( (By.ID, 'ctl00_duxLogoContainer')))
+        
+        home_page = self.driver.find_element(By.ID,'ctl00_duxLogoContainer')
+        
+        home_page.click()
         print('Login')
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 
