@@ -81,7 +81,7 @@ class Dux:
         
         home_page = self.driver.find_element(By.ID,'ctl00_duxLogoContainer')
         
-        home_page.click()
+        #home_page.click()
         print('Login')
         print(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 

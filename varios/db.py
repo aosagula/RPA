@@ -223,7 +223,8 @@ class Db:
                                 ie.fecha_cutoff_documental, \
                                 ie.hora_cutoff_documental, \
                                 ie.fecha_cutoff_fisico, \
-                                ie.hora_cutoff_fisico \
+                                ie.hora_cutoff_fisico, \
+                                ie.numop \
                                 FROM instruccion_embarque ie WHERE numop = ?", [numop])
             #print(self.cursor.rowcount)
             #print(*row, sep=' ')

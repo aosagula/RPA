@@ -19,7 +19,7 @@ def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta):
     try:
         print('Iniciando Doc en puerto')
         imagename = dux.dux.setDocPuerto(operacion, fecha_a_plaza, user, fecha_alta)
-        dux.dux.backMainMenu()
+        #dux.dux.backMainMenu()
         print("esperando proxima tarea DUX")
         time.sleep(1)
         return imagename
@@ -36,7 +36,7 @@ def setFechaPlaza(numop, tipo_op, fecha_a_plaza):
         else:
             imagename = dux.dux.setInImpo(numop, fecha_a_plaza)
             
-        dux.dux.backMainMenu()
+        #dux.dux.backMainMenu()
         print("esperando proxima tarea DUX")
         time.sleep(1)
         return imagename
@@ -130,12 +130,14 @@ try:
                 db.db.setEstadoTarea( current_task, 1)
                 numop = tarea[5]
                 values = db.db.getInstruccionEmbarque(numop)
-                imagename = dux.dux.setInstruccionEmbarque(numop, values)
+                if values and 'numop' in values and numop == values['numop']: # a veces cargan a mano la instruccion en dux y no figura en la tabla de instruciones 
+                    imagename = dux.dux.setInstruccionEmbarque(numop, values)
+                    print("esperando proxima tarea DUX")
+                    time.sleep(1)
+                    smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
                 db.db.setEstadoTarea( current_task, 2)
-                dux.dux.backMainMenu()
-                print("esperando proxima tarea DUX")
-                time.sleep(1)
-                smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
+                #dux.dux.backMainMenu()
+                
         dux.dux.Close()
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 except Exception as inst :

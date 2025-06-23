@@ -21,7 +21,7 @@ class Config:
         self.dux_factura_pdf = dux_factura_pdf
 
 config = Config('sistemas', 'Cocoloco', 'J:\SOLICITUD DJVE', '10.20.0.60',
-                'run2', 'vots_ssl', 'Cgz6EsQ4',3306, 'http://srv-duxweb02/dux/XZS001P001.aspx',
+                'run2', 'vots_ssl', 'Cgz6EsQ4',3306, 'http://10.20.0.67/dux/XZS001P001.aspx',
                 "mail.itservices.vaclog.com", 465, 'auto@itservices.vaclog.com','5nCWmcUGW7Dr', 
                 'C:\\Users\\auto\\Downloads', "J:\\DJVE_TXT_DUX", "\\\\10.20.0.170\\interfaz_dux\\CO")
 

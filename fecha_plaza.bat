@@ -1,15 +1,35 @@
-rem @echo off
-call %HOMEDRIVE%%HOMEPATH%\Anaconda3\Scripts\activate.bat RPA 
+@echo off
+SETLOCAL ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 
-FOR /F "tokens=*" %%A IN ('DATE/T') DO FOR %%B IN (%%A) DO SET Today=%%B
-
-FOR /F "tokens=1-3 delims=/-" %%A IN ("%Today%") DO (
+REM Obtener fecha
+FOR /F "tokens=1-3 delims=/- " %%A IN ('DATE /T') DO (
     SET Dia=%%A
     SET Mes=%%B
     SET Anio=%%C
 )
+SET FILENAMELOG=!Anio!-!Mes!-!Dia!
+SET LOGFILE=%TEMP%\fecha_plaza_!FILENAMELOG!.log
 
-SET FILENAMELOG=%Anio%-%Mes%-%Dia%
-print %FILENAMELOG% 2>&1
-%HOMEDRIVE%%HOMEPATH%\Anaconda3\envs\RPA\python.exe %HOMEDRIVE%%HOMEPATH%\RPA\varios\fecha_plaza.py>> %TEMP%\fecha_plaza_%FILENAMELOG%.log 2>&1
+echo "Validar existencia de activate.bat" >> "!LOGFILE!"
+IF NOT EXIST "C:\users\auto\Anaconda3\Scripts\activate.bat" (
+    echo ERROR: No se encuentra activate.bat >> "!LOGFILE!"
+    exit /b 1
+)
 
+echo Validar entorno de Python >> "!LOGFILE!"
+IF NOT EXIST "C:\users\auto\Anaconda3\envs\RPA\python.exe" (
+    echo ERROR: No se encuentra python.exe del entorno RPA >> "!LOGFILE!"
+    exit /b 2
+)
+
+echo Validar script Python >> "!LOGFILE!"
+IF NOT EXIST "C:\users\auto\RPA\varios\fecha_plaza.py" (
+    echo ERROR: No se encuentra fecha_plaza.py >> "!LOGFILE!"
+    exit /b 3
+)
+
+echo Activar entorno y ejecutar script >> "!LOGFILE!"
+call "C:\users\auto\Anaconda3\Scripts\activate.bat" RPA >> "!LOGFILE!" 2>&1
+"C:\users\auto\Anaconda3\envs\RPA\python.exe" "C:\users\auto\RPA\varios\fecha_plaza.py" >> "!LOGFILE!" 2>&1
+
+ENDLOCAL
