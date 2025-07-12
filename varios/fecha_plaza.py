@@ -36,7 +36,7 @@ def setFechaPlaza(numop, tipo_op, fecha_a_plaza):
         else:
             imagename = dux.dux.setInImpo(numop, fecha_a_plaza)
             
-        #dux.dux.backMainMenu()
+        dux.dux.backMainMenu()
         print("esperando proxima tarea DUX")
         time.sleep(1)
         return imagename
@@ -136,7 +136,7 @@ try:
                     time.sleep(1)
                     smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
                 db.db.setEstadoTarea( current_task, 2)
-                #dux.dux.backMainMenu()
+                dux.dux.backMainMenu()
                 
         dux.dux.Close()
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))

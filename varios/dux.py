@@ -76,7 +76,7 @@ class Dux:
         login_btn.click()
 
 
-        time.sleep(1)
+        time.sleep(3)
         home_page=    wait.until (EC.element_to_be_clickable( (By.ID, 'ctl00_duxLogoContainer')))
         
         home_page = self.driver.find_element(By.ID,'ctl00_duxLogoContainer')
@@ -120,7 +120,7 @@ class Dux:
     def setInstruccionEmbarque(self, numop, values=[]):
 
         wait = WebDriverWait(self.driver, 15)
-        time.sleep(5)
+        time.sleep(8)
         espera_carga = wait.until (EC.presence_of_all_elements_located( (By.CLASS_NAME, 'ctl00_Menu1_MenuLeft_Menu1_6')))
         
 
@@ -130,7 +130,7 @@ class Dux:
         
         otros_datos.location_once_scrolled_into_view
         self.driver.execute_script("arguments[0].click();", otros_datos)
-        time.sleep(1)
+        time.sleep(3)
         espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")))
 
         buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
