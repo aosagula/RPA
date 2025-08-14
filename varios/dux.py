@@ -356,9 +356,126 @@ class Dux:
         link.location_once_scrolled_into_view
         self.driver.execute_script("arguments[0].click();", link)
 
-        
-        
+    # Optimizado por AI Claude
     def setInImpo(self, numop, fecha_a_plaza):
+        from selenium.common.exceptions import InvalidElementStateException, TimeoutException
+        
+        wait = WebDriverWait(self.driver, 15)
+        time.sleep(5)
+        espera_carga = wait.until(EC.presence_of_all_elements_located((By.CLASS_NAME, 'ctl00_Menu1_MenuLeft_Menu1_6')))
+        
+        wait = WebDriverWait(self.driver, 15)
+        
+        otros_datos = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[6]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
+        
+        otros_datos.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", otros_datos)
+
+        espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")))
+
+        buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
+        operacion = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_txOperacionSeteable_AutoSuggestBox")
+        operacion.clear()
+        operacion.send_keys(numop)
+        buscar_op.click()
+
+        solapa_carga = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label24"]')
+
+        solapa_carga.location_once_scrolled_into_view
+        self.driver.execute_script("arguments[0].click();", solapa_carga)
+
+        espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_cfeFechaPlaza_Fecha")))
+        fecha_cumplido = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_cfeFechaPlaza_Fecha")
+
+        fecha_aplaza_value = fecha_cumplido.get_attribute('value')
+        print('fecha_a_plaza: ', fecha_aplaza_value)
+
+        imagename = self.SaveImage(numop)
+        
+        if len(fecha_aplaza_value) == 0:
+            time.sleep(3)
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
+            modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
+            modificar_op.click()
+            
+            wait = WebDriverWait(self.driver, 20)
+            time.sleep(3)
+            espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
+            
+            # Wait specifically for the date field to become enabled
+            try:
+                fecha_aplaza = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_cfeFechaPlaza_Fecha")))
+            except TimeoutException:
+                print("Date field didn't become clickable, trying to find it anyway...")
+                fecha_aplaza = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_cfeFechaPlaza_Fecha")
+            
+            print("Element enabled status:", fecha_aplaza.is_enabled())
+            print("Element innerHTML:", fecha_aplaza.get_attribute("innerHTML"))
+            
+            # Try multiple approaches to clear and set the date
+            success = False
+            
+            # Method 1: Standard clear() if enabled
+            if fecha_aplaza.is_enabled():
+                try:
+                    fecha_aplaza.clear()
+                    fecha_aplaza.send_keys(fecha_a_plaza)
+                    success = True
+                    print("Method 1 successful: Standard clear()")
+                except InvalidElementStateException as e:
+                    print(f"Method 1 failed: {e}")
+            
+            # Method 2: JavaScript enable + clear if Method 1 failed
+            if not success:
+                try:
+                    self.driver.execute_script("arguments[0].disabled = false;", fecha_aplaza)
+                    time.sleep(1)  # Small delay after enabling
+                    fecha_aplaza.clear()
+                    fecha_aplaza.send_keys(fecha_a_plaza)
+                    success = True
+                    print("Method 2 successful: JavaScript enable + clear()")
+                except Exception as e:
+                    print(f"Method 2 failed: {e}")
+            
+            # Method 3: JavaScript clear + send_keys if Method 2 failed
+            if not success:
+                try:
+                    self.driver.execute_script("arguments[0].disabled = false;", fecha_aplaza)
+                    self.driver.execute_script("arguments[0].value = '';", fecha_aplaza)
+                    fecha_aplaza.send_keys(fecha_a_plaza)
+                    success = True
+                    print("Method 3 successful: JavaScript clear")
+                except Exception as e:
+                    print(f"Method 3 failed: {e}")
+            
+            # Method 4: Pure JavaScript value setting if all else fails
+            if not success:
+                try:
+                    self.driver.execute_script(f"arguments[0].value = '{fecha_a_plaza}';", fecha_aplaza)
+                    # Trigger change event to notify the application
+                    self.driver.execute_script("arguments[0].dispatchEvent(new Event('change', {bubbles: true}));", fecha_aplaza)
+                    success = True
+                    print("Method 4 successful: JavaScript value setting")
+                except Exception as e:
+                    print(f"Method 4 failed: {e}")
+            
+            if not success:
+                print("All methods failed to set the date!")
+                return None
+            
+            print("Final date value set:", fecha_a_plaza)
+            
+            btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
+            btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
+            time.sleep(3)
+            
+            imagename = self.SaveImage(numop)
+            btn_guardar.click()
+        
+        return imagename    
+        
+    def setInImpo2(self, numop, fecha_a_plaza):
 
         wait = WebDriverWait(self.driver, 15)
         time.sleep(5)
@@ -399,6 +516,7 @@ class Dux:
             espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
             modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
             modificar_op.click()
+            wait = WebDriverWait(self.driver, 20)
             time.sleep(3)
             espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_btnCancelar")))
             fecha_aplaza = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_cfeFechaPlaza_Fecha")

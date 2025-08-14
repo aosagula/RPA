@@ -148,7 +148,7 @@ except Exception as inst :
     print(error_description)
     imagename=dux.dux.SaveImage(current_task)
     dux.dux.Close()
-    smtp.smtp.SendMail('tickets@itservices.vaclog.com', 'RPA_fecha_a_plaza -> Error en tarea {tarea}'.format(tarea=current_task), error_description, error_description, imagename)
+    smtp.smtp.SendMail('itrva@vaclog.com', 'RPA_fecha_a_plaza -> Error en tarea {tarea}'.format(tarea=current_task), error_description, error_description, imagename)
     if os.path.isfile(imagename):
         os.remove(imagename)
     
