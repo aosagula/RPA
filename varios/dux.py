@@ -307,7 +307,7 @@ class Dux:
             #fecha_pre_cumplido_value = fecha_pre_cumplido.get_attribute('value')
             #print('ya existe fecha_pre_cumplido: ', fecha_pre_cumplido_value)
 
-            btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+            
             
             
             espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
