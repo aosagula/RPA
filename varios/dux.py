@@ -273,7 +273,87 @@ class Dux:
             
         return imagename
     
-    def setDocPuerto(self, numop, fecha_a_plaza, user, fecha_alta):
+    
+    def setDocPuertoImpo(self, numop, fecha_a_plaza, user, fecha_alta):
+
+            wait = WebDriverWait(self.driver, 15)
+            time.sleep(5)
+            espera_carga = wait.until (EC.presence_of_all_elements_located( (By.CLASS_NAME, 'ctl00_Menu1_MenuLeft_Menu1_6')))
+            
+
+            wait = WebDriverWait(self.driver, 15)
+            
+            otros_datos = self.driver.find_element(By.XPATH, '/html/body/form/div[5]/nav/div[4]/div/div/div[1]/div[6]/table/tbody/tr[1]/td/table/tbody/tr/td/a')
+        
+            otros_datos.location_once_scrolled_into_view
+            self.driver.execute_script("arguments[0].click();", otros_datos)
+            
+            
+            time.sleep(2)
+
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")))
+
+            buscar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnBuscar")
+            operacion = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_txOperacionSeteable_AutoSuggestBox")
+            operacion.clear()
+            operacion.send_keys(numop)
+            buscar_op.click()
+
+            time.sleep(2)
+            solapa_carga = self.driver.find_element(By.XPATH, '//*[@id="ctl00_ContentPlaceHolder1_Label10"]')
+
+            solapa_carga.location_once_scrolled_into_view
+            self.driver.execute_script("arguments[0].click();", solapa_carga)
+
+            #espero_carga = wait.until(EC.presence_of_element_located((By.ID, "ctl00_ContentPlaceHolder1_ayuFechaPreCumplido_Fecha")))
+            #fecha_pre_cumplido = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_ayuFechaPreCumplido_Fecha")
+
+            
+            #fecha_pre_cumplido_value = fecha_pre_cumplido.get_attribute('value')
+            #print('ya existe fecha_pre_cumplido: ', fecha_pre_cumplido_value)
+
+            
+            time.sleep(2)
+            
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnModificar")))
+            modificar_op = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnModificar")
+            modificar_op.click()
+            
+            time.sleep(1)
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnAltaComentario")))
+            agregar_comentario_boton = self.driver.find_element(By.ID, "ctl00_ContentPlaceHolder1_btnAltaComentario")
+            agregar_comentario_boton.click()
+            
+            comentario = f"{fecha_a_plaza} CARPETA EN PUERTO ingresada por: {user} registrado a las: {fecha_alta}"
+            
+            txt_object = "ctl00_ContentPlaceHolder1_TextComentario_TextBox1"
+            
+            comentario_texto = self.driver.find_element(By.ID, txt_object)
+            comentario_texto.clear()
+            comentario_texto.send_keys(comentario)
+            
+            comentario_guardar = "ctl00_ContentPlaceHolder1_btnGuardar_AComentario"
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, comentario_guardar)))
+            comentario_guardar_boton = self.driver.find_element(By.ID, comentario_guardar)
+            comentario_guardar_boton.click()
+            print(comentario)
+            time.sleep(3)
+            
+            #btn_cancelar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnCancelar')
+            espero_carga = wait.until(EC.element_to_be_clickable((By.ID, "ctl00_ContentPlaceHolder1_btnGuardar")))
+            btn_guardar = self.driver.find_element(By.ID, 'ctl00_ContentPlaceHolder1_btnGuardar')
+            time.sleep(3)
+            imagename = self.SaveImage(numop)
+            #btn_cancelar.click()
+            btn_guardar.click()
+            # imagename = self.SaveImage(numop)
+            actions = ActionChains(self.driver)
+            actions.send_keys(Keys.ESCAPE).perform()
+            
+            return imagename
+
+    
+    def setDocPuertoExpo(self, numop, fecha_a_plaza, user, fecha_alta):
 
             wait = WebDriverWait(self.driver, 15)
             time.sleep(5)
