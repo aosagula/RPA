@@ -139,8 +139,9 @@ try:
                     print("esperando proxima tarea DUX")
                     time.sleep(1)
                     smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
+                    dux.dux.backMainMenu()
                 db.db.setEstadoTarea( current_task, 2)
-                dux.dux.backMainMenu()
+                
                 
         dux.dux.Close()
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
