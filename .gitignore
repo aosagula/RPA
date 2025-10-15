@@ -1,2 +1,6 @@
 __pycache__
 */__pycache__/*
+
+# Variables de entorno con datos sensibles
+.env
+varios/.env

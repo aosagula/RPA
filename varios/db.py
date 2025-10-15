@@ -90,64 +90,62 @@ class Db:
         return result
 
     def setSubidoADux(self, nro_factura):
-        query = f"""UPDATE cert_origen_documentos SET 
-                           subido_a_dux = 'S' 
-                    WHERE nro_factura = '{nro_factura}'
+        query = """UPDATE cert_origen_documentos SET
+                           subido_a_dux = 'S'
+                    WHERE nro_factura = ?
                       AND anulado = 'N'
                 """
-        self.cursor.execute(query )
+        self.cursor.execute(query, [nro_factura])
         self.conn.commit()
     def setEstadoTarea(self, id, estado, error_desciption=None, subestado_text=None):
         try:
             now = datetime.datetime.now()
             currentdatetime = now.strftime("%Y-%m-%d %H:%M:%S")
-            #print(estado)
             print("tarea:", id, " Estado:", estado )
+
             match estado:
                 case 1:
-                    tupla = [ 'fecha_inicio', currentdatetime]
-                    query = """UPDATE robot_tarea SET 
-                                    estado = %d,
-                                    fecha_inicio = %s
-                                WHERE id = %d
+                    query = """UPDATE robot_tarea SET
+                                    estado = ?,
+                                    fecha_inicio = ?
+                                WHERE id = ?
                     """
+                    params = (estado, currentdatetime, id)
                 case 2:
-                    tupla = [ 'fecha_cierre', currentdatetime]
-                    query = f"""UPDATE robot_tarea SET 
-                                    estado = %d,
-                                    fecha_cierre = %s,
-                                    error_text = '{error_desciption}'
-                                WHERE id = %d
+                    query = """UPDATE robot_tarea SET
+                                    estado = ?,
+                                    fecha_cierre = ?,
+                                    error_text = ?
+                                WHERE id = ?
                     """
+                    params = (estado, currentdatetime, error_desciption, id)
                 case 3:
-                    tupla = [ 'fecha_error', currentdatetime]
-                    query = f"""UPDATE robot_tarea SET 
-                                    estado = %d,
-                                    fecha_error = %s,
-                                    ultimo_error = '{subestado_text}',
-                                    error_text = '{error_desciption.replace("'","|")}'
-                                WHERE id = %d
+                    query = """UPDATE robot_tarea SET
+                                    estado = ?,
+                                    fecha_error = ?,
+                                    ultimo_error = ?,
+                                    error_text = ?
+                                WHERE id = ?
                     """
+                    error_text_safe = error_desciption.replace("'","|") if error_desciption else None
+                    params = (estado, currentdatetime, subestado_text, error_text_safe, id)
                 case 4:
-                    tupla = [ 'fecha_error', currentdatetime]
-                    query = f"""UPDATE robot_tarea SET 
-                                    estado = %d,
-                                    fecha_error = %s,
-                                    ultimo_error = '{subestado_text}',
-                                    error_text = '{error_desciption.replace("'","|")}'
-                                WHERE id = %d
+                    query = """UPDATE robot_tarea SET
+                                    estado = ?,
+                                    fecha_error = ?,
+                                    ultimo_error = ?,
+                                    error_text = ?
+                                WHERE id = ?
                     """
-            
-            
-           
-            #print(query, [(estado, tupla[0], tupla[1], id)]    )
-            self.cursor.execute(query, (estado, tupla[1], id) )
+                    error_text_safe = error_desciption.replace("'","|") if error_desciption else None
+                    params = (estado, currentdatetime, subestado_text, error_text_safe, id)
+
+            self.cursor.execute(query, params)
             self.conn.commit()
-            #self.cursor.close()  
         except mariadb.Error as e:
-            print(f"Error connecting to MariaDB Platform: {e}")
-            sys.exit(1)
-        
+            print(f"Error en setEstadoTarea: {e}")
+            raise
+
         return True
 
     def insertTarea(self, proceso, referencia, parametros):

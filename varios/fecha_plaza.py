@@ -156,9 +156,7 @@ try:
                 print(f"Error en tarea {current_task}: {error_description}")
 
                 # Enviar notificación individual del error
-                bot_token="8460706463:AAF_dBxFBcS_5uECSvc-6bQY_-5vZcSa7WY"
-                chat_id = '6870674844'
-                base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&text=Error en tarea {current_task}: {error_description[:200]}"
+                base_url = f"https://api.telegram.org/bot{config.config.telegram_bot_token}/sendMessage?chat_id={config.config.telegram_chat_id}&text=Error en tarea {current_task}: {error_description[:200]}"
                 requests.get(base_url)
 
                 try:
@@ -186,10 +184,7 @@ try:
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 except Exception as inst :
     error_description = traceback.format_exc()
-    bot_token="8460706463:AAF_dBxFBcS_5uECSvc-6bQY_-5vZcSa7WY"
-    chat_id = '6870674844'
-    base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&text={error_description}"
-    #base_url  = 'https://api.telegram.org/bot6884941709:AAFedvLx2DxTRtuQJ59BIO3AoB00VJVDE6E/sendMessage?chat_id=-4008612871&text="{}"'.format(error_description)
+    base_url = f"https://api.telegram.org/bot{config.config.telegram_bot_token}/sendMessage?chat_id={config.config.telegram_chat_id}&text={error_description}"
     requests.get(base_url)
     db.db.setEstadoTarea(current_task, 3, error_description)
     print(error_description)
