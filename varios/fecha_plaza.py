@@ -66,83 +66,130 @@ try:
     print('Buscando TAREAS Pendientes..')
     print("INICIANDO",datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
     tareas = db.db.getTareasPendientes('tareas')
-    
+
     if(len(tareas)>0):
         current_task=0
         import dux
-        
+
         dux.dux.Login()
         tos='itrva@vaclog.com,hbariain@vaclog.com,asagula@vaclog.com'
+
+        # Lista para almacenar errores por tarea
+        errores_tareas = []
+
         for tarea in tareas:
             current_task = tarea[0]
-            
-            
-            proceso = tarea[4]
-            user = tarea[2]
-            fecha_alta = tarea[3]
-            if proceso == 'doc_puerto_proceso':
-                db.db.setEstadoTarea( current_task, 1)
-                fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
-                imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta)
-                db.db.setEstadoTarea( current_task, 2)
-                
-                smtp.smtp.SendMail(tos.split(','), 'RPA_doc_en_puerto -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
-                if os.path.isfile(imagename):
-                    os.remove(imagename)
-            elif proceso== 'fecha_plaza_proceso':
-                db.db.setEstadoTarea( current_task, 1)
-                fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
-                skip_process = False
-                
-                if "SI" in continua_manana:
-                    skip_process = True
-                
-                if not skip_process:
-                    imagename = setFechaPlaza( numop, tipo_op, fecha_a_plaza)
+
+            try:
+                proceso = tarea[4]
+                user = tarea[2]
+                fecha_alta = tarea[3]
+                if proceso == 'doc_puerto_proceso':
+                    db.db.setEstadoTarea( current_task, 1)
+                    fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
+                    imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta)
                     db.db.setEstadoTarea( current_task, 2)
-                    #imagename=dux.dux.SaveImage(current_task)
-                    
-                    smtp.smtp.SendMail(tos.split(','), 'RPA_fecha_a_plaza -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
+
+                    smtp.smtp.SendMail(tos.split(','), 'RPA_doc_en_puerto -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
                     if os.path.isfile(imagename):
                         os.remove(imagename)
-                else:
-                    db.db.setEstadoTarea( current_task, 2, 'Salteado')
-            elif proceso == 'certificado_origen':
-                
-                tos='asagula@vaclog.com'
-                nro_factura = procesa_parametros(proceso, tarea[1])
-                matriz_op_remitos = db.db.getOperacionesRemitos(nro_factura)
-                db.db.setEstadoTarea( current_task, 1)
-                
-                if len(matriz_op_remitos) > 0:
-                    fecha_factura = matriz_op_remitos[0]['fecha_factura']
-                    archivo_factura = matriz_op_remitos[0]['archivo_factura']
-                    importe_no_gravado = matriz_op_remitos[0]['total_factura']
-                    imagename= dux.dux.ingresarFactura(nro_factura, fecha_factura.strftime("%d/%m/%Y"), matriz_op_remitos, archivo_factura, importe_no_gravado)
-                    db.db.setEstadoTarea( current_task, 2)
-                    smtp.smtp.SendMail(tos.split(','), f"RPA_factura_proveedores -> Factura {nro_factura} ", "OK", "OK", imagename)
-                    db.db.setSubidoADux(nro_factura)
-                    if os.path.isfile(imagename):
-                         os.remove(imagename)
-            elif proceso== 'instruccion_embarque':
-                tos='Celula4@vaclog.com,asagula@vaclog.com'
+                elif proceso== 'fecha_plaza_proceso':
+                    db.db.setEstadoTarea( current_task, 1)
+                    fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
+                    skip_process = False
 
-                db.db.setEstadoTarea( current_task, 1)
-                numop = tarea[5]
-                values = db.db.getInstruccionEmbarque(numop)
-                if values and 'numop' in values and numop == values['numop']: # a veces cargan a mano la instruccion en dux y no figura en la tabla de instruciones 
-                    imagename = dux.dux.setInstruccionEmbarque(numop, values)
-                    print("esperando proxima tarea DUX")
-                    time.sleep(1)
-                    smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
-                db.db.setEstadoTarea( current_task, 2)
-                dux.dux.backMainMenu()
-                
+                    if "SI" in continua_manana:
+                        skip_process = True
+
+                    if not skip_process:
+                        imagename = setFechaPlaza( numop, tipo_op, fecha_a_plaza)
+                        db.db.setEstadoTarea( current_task, 2)
+                        #imagename=dux.dux.SaveImage(current_task)
+
+                        smtp.smtp.SendMail(tos.split(','), 'RPA_fecha_a_plaza -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
+                        if os.path.isfile(imagename):
+                            os.remove(imagename)
+                    else:
+                        db.db.setEstadoTarea( current_task, 2, 'Salteado')
+                elif proceso == 'certificado_origen':
+
+                    tos='asagula@vaclog.com'
+                    nro_factura = procesa_parametros(proceso, tarea[1])
+                    matriz_op_remitos = db.db.getOperacionesRemitos(nro_factura)
+                    db.db.setEstadoTarea( current_task, 1)
+
+                    if len(matriz_op_remitos) > 0:
+                        fecha_factura = matriz_op_remitos[0]['fecha_factura']
+                        archivo_factura = matriz_op_remitos[0]['archivo_factura']
+                        importe_no_gravado = matriz_op_remitos[0]['total_factura']
+                        imagename= dux.dux.ingresarFactura(nro_factura, fecha_factura.strftime("%d/%m/%Y"), matriz_op_remitos, archivo_factura, importe_no_gravado)
+                        db.db.setEstadoTarea( current_task, 2)
+                        smtp.smtp.SendMail(tos.split(','), f"RPA_factura_proveedores -> Factura {nro_factura} ", "OK", "OK", imagename)
+                        db.db.setSubidoADux(nro_factura)
+                        if os.path.isfile(imagename):
+                             os.remove(imagename)
+                elif proceso== 'instruccion_embarque':
+                    tos='Celula4@vaclog.com,asagula@vaclog.com'
+
+                    db.db.setEstadoTarea( current_task, 1)
+                    numop = tarea[5]
+                    values = db.db.getInstruccionEmbarque(numop)
+                    if values and 'numop' in values and numop == values['numop']: # a veces cargan a mano la instruccion en dux y no figura en la tabla de instruciones
+                        imagename = dux.dux.setInstruccionEmbarque(numop, values)
+                        print("esperando proxima tarea DUX")
+                        time.sleep(1)
+                        smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
+                    db.db.setEstadoTarea( current_task, 2)
+                    dux.dux.backMainMenu()
+
+            except Exception as error_tarea:
+                # Capturar el error de la tarea individual
+                error_description = traceback.format_exc()
+                errores_tareas.append({
+                    'tarea_id': current_task,
+                    'proceso': proceso if 'proceso' in locals() else 'Desconocido',
+                    'error': error_description
+                })
+
+                # Marcar la tarea como fallida
+                db.db.setEstadoTarea(current_task, 3, error_description)
+                print(f"Error en tarea {current_task}: {error_description}")
+
+                # Enviar notificación individual del error
+                bot_token="8460706463:AAF_dBxFBcS_5uECSvc-6bQY_-5vZcSa7WY"
+                chat_id = '6870674844'
+                base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&text=Error en tarea {current_task}: {error_description[:200]}"
+                requests.get(base_url)
+
+                try:
+                    imagename=dux.dux.SaveImage(current_task)
+                    smtp.smtp.SendMail('itrva@vaclog.com', f'RPA -> Error en tarea {current_task}', error_description, error_description, imagename)
+                    if os.path.isfile(imagename):
+                        os.remove(imagename)
+                except:
+                    pass
+
+                # Continuar con la siguiente tarea
+                continue
+
         dux.dux.Close()
+
+        # Reporte final de errores
+        if errores_tareas:
+            print(f"\n=== RESUMEN DE ERRORES ({len(errores_tareas)} tareas fallidas) ===")
+            resumen_errores = "\n".join([f"Tarea {e['tarea_id']} ({e['proceso']}): {e['error'][:100]}..." for e in errores_tareas])
+            print(resumen_errores)
+
+            # Enviar reporte consolidado
+            smtp.smtp.SendMail('itrva@vaclog.com', f'RPA -> Resumen de errores ({len(errores_tareas)} tareas fallidas)', resumen_errores, resumen_errores, "")
+
     print("FINALIZADO", datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
 except Exception as inst :
     error_description = traceback.format_exc()
-    base_url = base_url  = 'https://api.telegram.org/bot6884941709:AAFedvLx2DxTRtuQJ59BIO3AoB00VJVDE6E/sendMessage?chat_id=-4008612871&text="{}"'.format(error_description)
+    bot_token="8460706463:AAF_dBxFBcS_5uECSvc-6bQY_-5vZcSa7WY"
+    chat_id = '6870674844'
+    base_url = f"https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={chat_id}&text={error_description}"
+    #base_url  = 'https://api.telegram.org/bot6884941709:AAFedvLx2DxTRtuQJ59BIO3AoB00VJVDE6E/sendMessage?chat_id=-4008612871&text="{}"'.format(error_description)
     requests.get(base_url)
     db.db.setEstadoTarea(current_task, 3, error_description)
     print(error_description)
