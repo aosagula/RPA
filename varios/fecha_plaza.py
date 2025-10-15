@@ -15,11 +15,14 @@ import os
 import requests
 
 
-def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta):
+def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta, tipo_op):
     try:
         print('Iniciando Doc en puerto')
-        imagename = dux.dux.setDocPuerto(operacion, fecha_a_plaza, user, fecha_alta)
-        #dux.dux.backMainMenu()
+        if( tipo_op == 'E'):
+            imagename = dux.dux.setDocPuertoExpo(operacion, fecha_a_plaza, user, fecha_alta)
+            #dux.dux.backMainMenu()
+        else:
+            imagename = dux.dux.setDocPuertoImpo(operacion, fecha_a_plaza, user, fecha_alta)
         print("esperando proxima tarea DUX")
         time.sleep(1)
         return imagename
@@ -79,6 +82,7 @@ try:
 
         for tarea in tareas:
             current_task = tarea[0]
+<<<<<<< HEAD
 
             try:
                 proceso = tarea[4]
@@ -88,6 +92,33 @@ try:
                     db.db.setEstadoTarea( current_task, 1)
                     fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
                     imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta)
+=======
+            
+            
+            proceso = tarea[4]
+            user = tarea[2]
+            fecha_alta = tarea[3]
+            if proceso == 'doc_puerto_proceso':
+                db.db.setEstadoTarea( current_task, 1)
+                fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
+                imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta, tipo_op)
+                db.db.setEstadoTarea( current_task, 2)
+                
+                smtp.smtp.SendMail(tos.split(','), 'RPA_doc_en_puerto -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
+                if os.path.isfile(imagename):
+                    os.remove(imagename)
+                dux.dux.backMainMenu()
+            elif proceso== 'fecha_plaza_proceso':
+                db.db.setEstadoTarea( current_task, 1)
+                fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
+                skip_process = False
+                
+                if "SI" in continua_manana:
+                    skip_process = True
+                
+                if not skip_process:
+                    imagename = setFechaPlaza( numop, tipo_op, fecha_a_plaza)
+>>>>>>> 8b246f3b7822b6d4cc56ab606dc6306bdfbd738b
                     db.db.setEstadoTarea( current_task, 2)
 
                     smtp.smtp.SendMail(tos.split(','), 'RPA_doc_en_puerto -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
@@ -170,6 +201,21 @@ try:
                 # Continuar con la siguiente tarea
                 continue
 
+<<<<<<< HEAD
+=======
+                db.db.setEstadoTarea( current_task, 1)
+                numop = tarea[5]
+                values = db.db.getInstruccionEmbarque(numop)
+                if values and 'numop' in values and numop == values['numop']: # a veces cargan a mano la instruccion en dux y no figura en la tabla de instruciones 
+                    imagename = dux.dux.setInstruccionEmbarque(numop, values)
+                    print("esperando proxima tarea DUX")
+                    time.sleep(1)
+                    smtp.smtp.SendMail(tos.split(','), 'RPA_instruccion_embarque -> Operación {operacion} '.format(operacion=numop), "OK", "OK", imagename)
+                    dux.dux.backMainMenu()
+                db.db.setEstadoTarea( current_task, 2)
+                
+                
+>>>>>>> 8b246f3b7822b6d4cc56ab606dc6306bdfbd738b
         dux.dux.Close()
 
         # Reporte final de errores
