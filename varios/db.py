@@ -283,6 +283,7 @@ class Db:
             sentence="""SELECT  cof.nro_remito, cof.fecha_factura, cof.numop, 
                             cod.archivo as archivo_factura,
                             cod.total_factura,
+                            cof.facturar_flag,
                             GROUP_CONCAT(cof.certificado SEPARATOR ',') AS certificados,
                             SUM(cof.precio_unitario) as suma
                           FROM cert_origen_facturacion cof
@@ -290,6 +291,7 @@ class Db:
                           WHERE cof.nro_factura = ?
                           AND cof.anulado = 'N'
                           GROUP BY cof.nro_remito, cof.fecha_factura, cof.numop, cod.archivo 
+                          ORDER BY cof.numop
                           """
             
             

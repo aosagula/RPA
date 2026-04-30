@@ -33,6 +33,7 @@ class Dux:
 
         options = Options()
         options.binary_location = firefox_binary_path
+        #options.add_argument("--headless")
         self.driver = webdriver.Firefox(options=options,service_log_path=filename  )
         self.driver.get(url)
         
@@ -616,7 +617,7 @@ class Dux:
 
     def procesarOperacion(self, item, i):
         wait = WebDriverWait(self.driver, 2)
-
+        perdida_operativa_concepto = '293771'
         concepto_gasto = '112256'
         importe = str(item["suma"])
         detalle = f"Remito: {item['nro_remito']} por los certificados {item['certificados']}"
@@ -624,59 +625,76 @@ class Dux:
         print(f"numop: {numop} - importe: {importe} - detalle: {detalle}")
 
         buscar = f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ewnNroOperacion"
-        #operacion = wait.until(EC.element_located_to_be_selected((By.ID, buscar)))
+        if (numop != '0' or numop != 0) and item["facturar_flag"] == 'S':
 
-        operacion = self.driver.find_element(By.ID, buscar)
-        operacion.clear()
-        operacion.send_keys(numop)
-        operacion.send_keys(Keys.TAB)
+            try:
+                
+                
+                #operacion = wait.until(EC.element_located_to_be_selected((By.ID, buscar)))
 
-        try:
-            time.sleep(1)
+                operacion = self.driver.find_element(By.ID, buscar)
+                operacion.clear()
+                operacion.send_keys(numop)
+                operacion.send_keys(Keys.TAB)
+                time.sleep(2)
+                
+                modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
+                time.sleep(2)
+                if ( modal.text == 'La operación:\n* tiene facturas contabilizadas'):
+                    
+                    
+                    close_button = wait.until(EC.presence_of_element_located((
+                                    By.CSS_SELECTOR,
+                                    "div[role='dialog'][style*='z-index'] button[title='Close']"
+                                )))
+
+                    actions = ActionChains(self.driver)
+                    actions.move_to_element(close_button).pause(0.3).click().perform()
+                    actions.move_to_element(close_button).pause(0.3).click().perform()
+                    actions.move_to_element(close_button).pause(0.3).click().perform()
+
+                    #modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
+                    
+                    #modal_close = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                    
+                    #modal_close.click()
+                    #modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                    #if len(modal_close) > 0:
+                    #    modal_close[1].click()
+                    #    modal_close[0].click()
+
+            except TimeoutException as e:
+                print(e)
+                print(traceback.format_exc())
+            except IndexError as e:
+                print(f"Error de index: {e}")
+            except StaleElementReferenceException as e:
+                print(traceback.format_exc())
+                print(e)
+                print("StaleElementReferenceException")
+        else:
+            operacion = self.driver.find_element(By.ID, buscar)
+            operacion.click()
+            operacion.clear()
             
-            modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
-            time.sleep(1)
-            if ( modal.text == 'La operación:\n* tiene facturas contabilizadas'):
-                
-                
-                close_button = wait.until(EC.presence_of_element_located((
-                                By.CSS_SELECTOR,
-                                "div[role='dialog'][style*='z-index'] button[title='Close']"
-                            )))
-
-                actions = ActionChains(self.driver)
-                actions.move_to_element(close_button).pause(0.3).click().perform()
-                actions.move_to_element(close_button).pause(0.3).click().perform()
-                actions.move_to_element(close_button).pause(0.3).click().perform()
-
-                #modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
-                
-                #modal_close = self.driver.find_element(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
-                
-                #modal_close.click()
-                #modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
-                #if len(modal_close) > 0:
-                #    modal_close[1].click()
-                #    modal_close[0].click()
-
-        except TimeoutException as e:
-            print(e)
-        except IndexError as e:
-            print(f"Error de index: {e}")
-        except StaleElementReferenceException:
-            print("StaleElementReferenceException")
-        time.sleep(1)
+            operacion.send_keys(Keys.TAB)
+            time.sleep(2)
+            concepto_gasto = perdida_operativa_concepto
+        
+        
+            
+        time.sleep(3)
         combo_gastos = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ayudaGasto_AutoSuggestBox")))
 
         combo_gastos = self.driver.find_element(By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ayudaGasto_AutoSuggestBox")
         
         combo_gastos.send_keys(Keys.CONTROL + 'a')
         combo_gastos.send_keys(Keys.DELETE) 
-        time.sleep(1)
+        time.sleep(2)
         combo_gastos.send_keys(concepto_gasto)
-        time.sleep(1)
+        time.sleep(2)
         combo_gastos.send_keys(Keys.TAB)
-        time.sleep(1)
+        time.sleep(2)
         
         importe_input = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_importe")))
         
@@ -686,13 +704,20 @@ class Dux:
         importe_input.send_keys(importe)
         importe_input.send_keys(Keys.TAB)
 
-        time.sleep(1)
+        time.sleep(2)
         detalle_input = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_detalle")))
 
         detalle_input = self.driver.find_element(By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_detalle")
         detalle_input.clear()
         detalle_input.send_keys(detalle)
         detalle_input.send_keys(Keys.TAB)
+        
+        TC_input = wait.until(EC.element_to_be_clickable((By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_tipoDeCambioInformado")))
+
+        TC_input = self.driver.find_element(By.ID, f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_tipoDeCambioInformado")
+        TC_input.clear()
+        TC_input.click()
+        TC_input.send_keys(Keys.TAB)
 
     def ajustar_fecha_factura(self, fecha_factura: str) -> str:
         """
@@ -771,7 +796,7 @@ class Dux:
         self.procesarCabeceraFactura(nro_factura, fecha_factura, archivo_factura, importe_no_gravado)
 
         length = len(data_factura)
-
+        raise_flag = False
         if length > 10:
             range = length - 10
 
@@ -823,23 +848,50 @@ class Dux:
         except IndexError as e:
             print(f"Error de index: {e}")
         time.sleep(5)
-        current_windows =self.driver.current_window_handle
-        windows = self.driver.window_handles
-
-        self.driver.switch_to.window(windows[-1])
-
-        imagename= self.SaveImage(nro_factura)
-        self.driver.close()
-        self.driver.switch_to.window(current_windows)
         
-        bot = self.driver.find_elements(By.CSS_SELECTOR, "button.ui-button")
-        for b in bot:
-            if b.text == 'No':
-                b.click()
+        
+        try:
+            time.sleep(1)
+            
+            modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
+            
+            if ( 'desistida' in modal.text ):
+                raise_flag = True
+                imagename= self.SaveImage(nro_factura)
+                modal_close = WebDriverWait(self.driver, 10).until(EC.element_to_be_clickable((By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")))
+                modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                
+                modal_close[0].click()
+                # modal_close = self.driver.find_elements(By.CSS_SELECTOR, ".ui-button.ui-widget.ui-state-default.ui-corner-all.ui-button-text-only")
+                # if len(modal_close) > 0:
+                #     modal_close[1].click()
+                #     modal_close[0].click()
+
+        except TimeoutException as e:
+            print(e)
+            print(traceback.format_exc())
+        except IndexError as e:
+            print(f"Error de index: {e}")
+            print(traceback.format_exc())
+        time.sleep(5)
+        if raise_flag == False:
+            current_windows =self.driver.current_window_handle
+            windows = self.driver.window_handles
+
+            self.driver.switch_to.window(windows[-1])
+
+            imagename= self.SaveImage(nro_factura)
+            #self.driver.close()
+            self.driver.switch_to.window(current_windows)
+            
+            bot = self.driver.find_elements(By.CSS_SELECTOR, "button.ui-button")
+            for b in bot:
+                if b.text == 'No':
+                    b.click()
         
         time.sleep(3)
 
-        return imagename
+        return imagename, raise_flag
     def testbtn(self, numop):
         wait = WebDriverWait(self.driver, 15)
         time.sleep(5)
