@@ -851,7 +851,7 @@ class Dux:
         
         
         try:
-            time.sleep(1)
+            time.sleep(5)
             
             modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
             
