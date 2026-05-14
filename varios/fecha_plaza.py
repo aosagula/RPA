@@ -17,10 +17,13 @@ import requests
 import subprocess
 import dux
 
-def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta):
+def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta, tipo_op = 'E'):
     try:
         print('Iniciando Doc en puerto')
-        imagename = dux.dux.setDocPuerto(operacion, fecha_a_plaza, user, fecha_alta)
+        if tipo_op == 'E':
+            imagename = dux.dux.setDocPuertoExpo(operacion, fecha_a_plaza, user, fecha_alta)
+        else:
+            imagename = dux.dux.setDocPuertoImpo(operacion, fecha_a_plaza, user, fecha_alta)
         #dux.dux.backMainMenu()
         print("esperando proxima tarea DUX")
         time.sleep(1)
@@ -104,7 +107,8 @@ def main():
                     if proceso == 'doc_puerto_proceso':
                         db.db.setEstadoTarea( current_task, 1)
                         fecha_a_plaza, numop, tipo_op, continua_manana = procesa_parametros(proceso, tarea[1])
-                        imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta)
+                        
+                        imagename = setDocPuerto( numop, fecha_a_plaza, user, fecha_alta, tipo_op)
                         db.db.setEstadoTarea( current_task, 2)
 
                         smtp.smtp.SendMail(tos.split(','), 'RPA_doc_en_puerto -> Operación {operacion} Confirmada fecha {fecha_a_plaza}'.format(operacion=numop, fecha_a_plaza=fecha_a_plaza), "OK", "OK", imagename)
