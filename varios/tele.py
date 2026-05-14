@@ -5,7 +5,7 @@ import requests
 
 # Initialize bot
 #bot = telegram.Bot(token=bot_token)
-bot_token="8460706463:AAF_dBxFBcS_5uECSvc-6bQY_-5vZcSa7WY"
+bot_token=""
 
 #bot.send_message(chat_id, text='HOLA')#, parse_mode=ParseMode.MARKDOWN)
     
