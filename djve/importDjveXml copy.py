@@ -6,12 +6,14 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import datetime
 import config
+import atexit
 
 import db
 
 
 
 driver = webdriver.Firefox()
+atexit.register(driver.quit)
 
 
 driver.get('http://srv-duxweb02/dux/XZS001P001.aspx')

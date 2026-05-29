@@ -16,6 +16,7 @@ import time
 from datetime import datetime
 import re
 import tempfile
+import atexit
 class ImportXmlFail(Exception):
         def __init__(self, message):
             self.message = message
@@ -957,7 +958,9 @@ class Dux:
 
 
     def Close (self):
-        self.driver.close()
+        if self.driver:
+            self.driver.quit()
+            self.driver = None
 
     def OpenGestionDjve(self):
         wait = WebDriverWait(self.driver, 10)
@@ -1138,3 +1141,4 @@ class Dux:
         shutil.move(f"{source_dir}/{filename}", f"{destination_dir}/{filename}")
 
 dux = Dux( config.config.dux_url, config.config.dux_username, config.config.dux_password )
+atexit.register(dux.Close)

@@ -196,8 +196,6 @@ def main():
                     dux.dux.backMainMenu()
                     continue
                     
-            dux.dux.Close()
-
             # Reporte final de errores
             if errores_tareas:
                 print(f"\n=== RESUMEN DE ERRORES ({len(errores_tareas)} tareas fallidas) ===")
@@ -217,10 +215,15 @@ def main():
         db.db.setEstadoTarea(current_task, 3, error_description)
         print(error_description)
         imagename=dux.dux.SaveImage(current_task)
-        dux.dux.Close()
         smtp.smtp.SendMail('itrva@vaclog.com', 'RPA_fecha_a_plaza -> Error en tarea {tarea}'.format(tarea=current_task), error_description, error_description, imagename)
         if os.path.isfile(imagename):
             os.remove(imagename)
+    finally:
+        if 'dux' in locals():
+            try:
+                dux.dux.Close()
+            except Exception:
+                print(traceback.format_exc())
     
 
 main()
