@@ -34,7 +34,7 @@ class Dux:
 
         options = Options()
         options.binary_location = firefox_binary_path
-        #options.add_argument("--headless")
+        options.add_argument("--headless")
         self.driver = webdriver.Firefox(options=options,service_log_path=filename  )
         self.driver.get(url)
         
