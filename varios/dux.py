@@ -34,7 +34,7 @@ class Dux:
 
         options = Options()
         options.binary_location = firefox_binary_path
-        options.add_argument("--headless")
+        #options.add_argument("--headless")
         self.driver = webdriver.Firefox(options=options,service_log_path=filename  )
         self.driver.get(url)
         
@@ -641,7 +641,7 @@ class Dux:
                 
                 modal = WebDriverWait(self.driver, 5).until(EC.visibility_of_element_located((By.CSS_SELECTOR, ".duxMsgBox")))
                 time.sleep(2)
-                if ( modal.text == 'La operación:\n* tiene facturas contabilizadas'):
+                if ( "tiene facturas contabilizadas" in modal.text ):
                     
                     
                     close_button = wait.until(EC.presence_of_element_located((
@@ -846,6 +846,7 @@ class Dux:
 
         except TimeoutException as e:
             print(e)
+            raise e
         except IndexError as e:
             print(f"Error de index: {e}")
         time.sleep(5)
