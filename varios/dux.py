@@ -18,6 +18,20 @@ from datetime import datetime
 import re
 import tempfile
 import atexit
+import inspect
+
+def make_firefox_service(log_filename):
+    """
+    Crea un Service compatible con distintas versiones de Selenium:
+    el kwarg para el archivo de log paso de llamarse 'log_path' a
+    'log_output' entre versiones, y en otras no existe ninguno.
+    """
+    params = inspect.signature(Service.__init__).parameters
+    if 'log_output' in params:
+        return Service(log_output=log_filename)
+    if 'log_path' in params:
+        return Service(log_path=log_filename)
+    return Service()
 class ImportXmlFail(Exception):
         def __init__(self, message):
             self.message = message
@@ -36,7 +50,7 @@ class Dux:
         options = Options()
         options.binary_location = firefox_binary_path
         #options.add_argument("--headless")
-        service = Service(log_output=filename)
+        service = make_firefox_service(filename)
         self.driver = webdriver.Firefox(options=options, service=service)
         self.driver.get(url)
         
