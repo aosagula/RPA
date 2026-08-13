@@ -15,7 +15,72 @@ import os
 import tempfile
 import requests
 import subprocess
+import re
 import dux
+
+def repair_unescaped_quotes(s):
+    """
+    Repara JSON con comillas dobles sin escapar dentro de valores string
+    (p.ej. direcciones de un geocoder: "cerca de "Dr. Fulano", 1560").
+    Una comilla dentro de un string se trata como cierre real solo si,
+    salteando espacios, le sigue ':' '}' ']' o ',' seguido de una
+    proxima clave "clave":. En cualquier otro caso se escapa como contenido.
+    """
+    result = []
+    i, n = 0, len(s)
+    in_string = False
+    escape = False
+    key_pattern = re.compile(r'"[^"\\]*"\s*:')
+    while i < n:
+        c = s[i]
+        if in_string:
+            if escape:
+                result.append(c)
+                escape = False
+                i += 1
+                continue
+            if c == '\\':
+                result.append(c)
+                escape = True
+                i += 1
+                continue
+            if c == '"':
+                j = i + 1
+                while j < n and s[j] in ' \t\r\n':
+                    j += 1
+                closes = False
+                if j >= n:
+                    closes = True
+                elif s[j] in '}]':
+                    closes = True
+                elif s[j] == ':':
+                    closes = True
+                elif s[j] == ',':
+                    k = j + 1
+                    while k < n and s[k] in ' \t\r\n':
+                        k += 1
+                    closes = k < n and s[k] == '"' and bool(key_pattern.match(s[k:]))
+                if closes:
+                    in_string = False
+                    result.append(c)
+                else:
+                    result.append('\\"')
+                i += 1
+                continue
+            result.append(c)
+            i += 1
+        else:
+            if c == '"':
+                in_string = True
+            result.append(c)
+            i += 1
+    return ''.join(result)
+
+def safe_json_loads(parametros):
+    try:
+        return json.loads(parametros)
+    except json.JSONDecodeError:
+        return json.loads(repair_unescaped_quotes(parametros))
 
 def setDocPuerto( operacion, fecha_a_plaza, user, fecha_alta, tipo_op = 'E'):
     try:
@@ -50,7 +115,7 @@ def setFechaPlaza(numop, tipo_op, fecha_a_plaza):
 
 def procesa_parametros(proceso, parametros):
 
-    y = json.loads(parametros)
+    y = safe_json_loads(parametros)
 
     if proceso == 'doc_puerto_proceso' or proceso == 'fecha_plaza_proceso':        
         print(y["numop"])

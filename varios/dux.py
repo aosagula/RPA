@@ -9,6 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.actions.action_builder import ActionBuilder
 from selenium.webdriver import ActionChains
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 from selenium.common.exceptions import TimeoutException, StaleElementReferenceException
 import traceback
 import os
@@ -35,7 +36,8 @@ class Dux:
         options = Options()
         options.binary_location = firefox_binary_path
         #options.add_argument("--headless")
-        self.driver = webdriver.Firefox(options=options,service_log_path=filename  )
+        service = Service(log_output=filename)
+        self.driver = webdriver.Firefox(options=options, service=service)
         self.driver.get(url)
         
         wait = WebDriverWait(self.driver, 10) 

@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(where python *)",
+      "Bash(where py *)",
+      "Bash(python -m venv venv)",
+      "Bash(./venv/Scripts/python.exe -m pip install --upgrade pip)",
+      "Bash(./venv/Scripts/python.exe -m pip install selenium requests python-telegram-bot beautifulsoup4 python-dotenv playwright)",
+      "Bash(./venv/Scripts/python.exe -m pip install mariadb)",
+      "Bash(./venv/Scripts/python.exe -c \"import mariadb; print\\('mariadb OK', mariadb.__version__\\)\")",
+      "Bash(./venv/Scripts/python.exe -m pip freeze)",
+      "Bash(./venv/Scripts/python.exe -c \"from selenium.webdriver.firefox.service import Service; import inspect; print\\(inspect.signature\\(Service.__init__\\)\\)\")",
+      "Bash(./venv/Scripts/python.exe -m py_compile varios/dux.py)",
+      "Bash(../venv/Scripts/python.exe -c ' *)",
+      "Bash(./venv/Scripts/python.exe \"C:\\\\Users\\\\asagula\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\c--prg-VACLOG-RPA\\\\94fe76cc-72f9-49ed-b4fe-b7de23e9cef8\\\\scratchpad\\\\test_fecha_plaza_json.py\")",
+      "Bash(./venv/Scripts/python.exe -m py_compile varios/fecha_plaza.py)"
+    ]
+  }
+}
