@@ -177,7 +177,7 @@ class Dux:
         self.driver.execute_script("arguments[0].click();", solapa_datos_compl)
         time.sleep(2)
 
-        self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtNumeroBooking", values['nro_booking'])
+        # self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtNumeroBooking", values['nro_booking'])
 
         
 
@@ -185,22 +185,24 @@ class Dux:
 
         # Verifica si el formato es YYYY-MM-DD
         if re.match(r'^\d{4}-\d{2}-\d{2}$', fecha_str):
-            self.locateAndSetValue(
-                "ctl00_ContentPlaceHolder1_ayuFechaCutOffDocumental_Fecha",
-                datetime.strptime(fecha_str, '%Y-%m-%d').strftime('%d/%m/%Y')
-            )
-        self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffDocumental", values['hora_cutoff_documental'], 'format_time')
+            #self.locateAndSetValue(
+            #    "ctl00_ContentPlaceHolder1_ayuFechaCutOffDocumental_Fecha",
+            #    datetime.strptime(fecha_str, '%Y-%m-%d').strftime('%d/%m/%Y')
+            #)
+            pass
+        #self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffDocumental", values['hora_cutoff_documental'], 'format_time')
         fecha_str = values.get('fecha_cutoff_fisico', '')
 
 
         # Verifica si el formato es YYYY-MM-DD
         if re.match(r'^\d{4}-\d{2}-\d{2}$', fecha_str):
-            self.locateAndSetValue(
-                "ctl00_ContentPlaceHolder1_ayuFechaCutOffFisico_Fecha",
-                datetime.strptime(fecha_str, '%Y-%m-%d').strftime('%d/%m/%Y')
-            )
+            #self.locateAndSetValue(
+            #    "ctl00_ContentPlaceHolder1_ayuFechaCutOffFisico_Fecha",
+            #    datetime.strptime(fecha_str, '%Y-%m-%d').strftime('%d/%m/%Y')
+            #)
+            pass
         
-        self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffFisico", values['hora_cutoff_fisico'], 'format_time')
+        #self.locateAndSetValue("ctl00_ContentPlaceHolder1_txtHoraCutOffFisico", values['hora_cutoff_fisico'], 'format_time')
         
         
         imagename = self.SaveImage(numop)
