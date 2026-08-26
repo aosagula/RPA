@@ -644,7 +644,7 @@ class Dux:
         print(f"numop: {numop} - importe: {importe} - detalle: {detalle}")
 
         buscar = f"ctl00_ContentPlaceHolder1_esGridItems_ctl{i:02}_ewnNroOperacion"
-        if (numop != '0' or numop != 0) and item["facturar_flag"] == 'S':
+        if (numop != '0' or numop != 0) and item["facturar_flag"] == 'S' and item["fecha_desistido"] == None:
 
             try:
                 
