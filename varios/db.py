@@ -289,7 +289,7 @@ class Db:
                             operae.fecdne as fecha_desistido
                           FROM cert_origen_facturacion cof
                           JOIN cert_origen_documentos cod ON cod.nro_factura = cof.nro_factura AND cod.anulado = 'N'
-                          JOIN operae ON operae.tripli = cof.numop
+                          LEFT JOIN operae ON operae.tripli = cof.numop
                           WHERE cof.nro_factura = ?
                           AND cof.anulado = 'N'
                           GROUP BY cof.nro_remito, cof.fecha_factura, cof.numop, cod.archivo, operae.fecdne 
