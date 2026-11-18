@@ -748,14 +748,9 @@ class Dux:
         
         # Obtenemos la fecha actual
         hoy = datetime.today()
-        
-        # Si hoy es mayor al día 15 y la fecha_factura es del mes anterior al mes actual
-        if hoy.day > 5:
-            if (fecha_factura_dt.year == hoy.year and fecha_factura_dt.month == hoy.month - 1) or \
-            (fecha_factura_dt.year == hoy.year - 1 and hoy.month == 1 and fecha_factura_dt.month == 12):
-                # Ajustar la fecha al primer día del mes en curso
-                nueva_fecha = datetime(hoy.year, hoy.month, 1)
-                return nueva_fecha.strftime("%d/%m/%Y")
+        primer_dia_mes_actual = datetime(hoy.year, hoy.month, 1)
+        if hoy.day > 5 and fecha_factura_dt < primer_dia_mes_actual:
+            return primer_dia_mes_actual.strftime("%d/%m/%Y")
         
         return fecha_factura
         
